@@ -28,6 +28,8 @@ const humidityEl: HTMLParagraphElement = document.getElementById(
   'humidity'
 ) as HTMLParagraphElement;
 
+const defaultContent = todayContainer.innerHTML;
+
 /*
 
 API Calls
@@ -43,12 +45,14 @@ const fetchWeather = async (cityName: string) => {
     body: JSON.stringify({ cityName }),
   });
 
-  const weatherData = await response.json();
+  if (response.ok) {
+    const weatherData = await response.json();    
 
-  console.log('weatherData: ', weatherData);
-
-  renderCurrentWeather(weatherData[0]);
-  renderForecast(weatherData.slice(1));
+    renderCurrentWeather(weatherData[0]);
+    renderForecast(weatherData.slice(1));
+  } else {
+    renderError();
+  }
 };
 
 const fetchSearchHistory = async () => {
@@ -78,7 +82,7 @@ Render Functions
 
 const renderCurrentWeather = (currentWeather: any): void => {
   const { city, date, icon, iconDescription, tempF, windSpeed, humidity } =
-    currentWeather;
+    currentWeather;  
 
   // convert the following to typescript
   heading.textContent = `${city} (${date})`;
@@ -157,6 +161,22 @@ const renderSearchHistory = async (searchHistory: any) => {
     }
   }
 };
+
+const renderError = () => {
+  if (todayContainer) {
+    todayContainer.innerHTML = defaultContent;
+  }
+
+  const errorMessage = document.createElement('h3');
+  errorMessage.textContent = 'City not found. Please try again.';
+  errorMessage.classList.add('text-danger');
+  errorMessage.setAttribute('style', 'margin-left:40px');
+
+  if (forecastContainer) {
+    forecastContainer.innerHTML = '';
+    forecastContainer.append(errorMessage);
+  }
+}
 
 /*
 
